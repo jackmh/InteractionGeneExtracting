@@ -1,0 +1,29 @@
+	Dictionary (add with corresponding protein to gene) Dictionary and Entity Rules: Exact String Matching: 
+		1> Normalization of case. 
+		2> Removal of parenthesized materials. --- Interleukin(IL)-1 beta ---> Interleukin-1 beta
+		3> Replacement of hyphens, punctuation(semicolon, colon, comma) with spaces.
+			--- protease, cyseine 1 ---> protease cyseine 1 --- PLK-1 or PLK_1 ---> PLK 1
+		4> Replacement of Arabic numbers to Roman numerals. --- MKK 2 ---> MKK II
+		5> Removal of extral words. --- human c-myb gene ---> c-myb
+		6> Removal of stop words. ---Homolog of zyg-11 ---> Homolog zyg-11
+		7> Removal of all spaces.
+		
+		Deal with string with punctuation of "/": 
+			1> serine/threonine-protein kinase SBK2 ---> serine kinase SBK2 ---> threonine-protein kinase SBK2
+			2> alkaline phosphatase, liver/bone/kidney
+			---> alkaline phosphatase, liver ---> alkaline phosphatase, bone ---> alkaline phosphatase, kidney
+			3> alpha-1-microglobulin/bikunin precursor ---> alpha-1-microglobulin precursor ---> bikunin precursor
+			4> cell adhesion molecule-related/down-regulated by oncogenes
+			---> cell adhesion molecule-related by oncogenes ---> cell adhesion down-regulated by oncogenes
+			5> heart/skeletal muscle ATP/ADP translocator
+			---> heart muscle ATP translocator ---> heart muscle ADP translocator
+			---> skeletal muscle ATP translocator ---> skeletal muscle ADP translocator
+			6> phosphotyrosine-binding/-interacting domain (PTB)-bearing protein
+			---> phosphotyrosine-binding domain (PTB)-bearing protein
+			---> phosphotyrosine-interacting domain (PTB)-bearing protein
+			7> U4/U6.U5 tri-snRNP-associated protein 3
+			---> U4 tri-snRNP-associated protein 3 ---> U6.U5 tri-snRNP-associated protein 3
+			8> CDKN2A/B ---> CDKN2A | CDKN2B
+			9> IKK1/2 ---> IKK1 | IKK2
+			10> IkappaBalpha/beta ---> IkappaBalpha | IkappaBbeta
+			11> affixin/beta-parvin ---> affixin | beta-parvin
