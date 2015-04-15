@@ -1,12 +1,15 @@
 package interaction;
 
 import config.config;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import normalization.ElemOfSentence;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
@@ -48,7 +51,7 @@ public class getRelationParseTree {
 	public String getRelateion(LexicalizedParser lParser,
 			HashSet<String> geneSet,
 			HashSet<String> relationKeySet,
-			geneOfSentence geneSent
+			ElemOfSentence geneSent
 			)
 	{
 		String newSentenceText = "";
@@ -96,7 +99,7 @@ public class getRelationParseTree {
 				HashSet<String> geneSet,
 				HashSet<String> relationKeySet,
 				int kRule,
-				geneOfSentence proteinSent
+				ElemOfSentence proteinSent
 				)
 	{
 		String textStr = "";
@@ -212,14 +215,14 @@ public class getRelationParseTree {
 		 *
 	***************************************************************/
 	private boolean isNegativeWordsInSentence(
-			geneOfSentence proteinSent,
+			ElemOfSentence proteinSent,
 			int kRule,
 			String relationStr,
 			String GeneAStr,
 			String GeneBStr
 			)
 	{
-		int relationLocation = proteinSent.getLocationOfSpecifiedWords(proteinSent.getRelationWordsMap(), relationStr);
+		int relationLocation = proteinSent.getLocationOfSpecifiedWords(proteinSent.getRelationWordsLoc(), relationStr);
 		boolean relationNegative = false;
 		int GeneALocation = proteinSent.getLocationOfRecognitionProtein(GeneAStr);
 		boolean geneANegative = false;
@@ -227,9 +230,9 @@ public class getRelationParseTree {
 		boolean geneBNegative = false;
 		
 		// not, no, n't
-		if (proteinSent.getNumberOfNegativeWords() > 0) {
+		if (proteinSent.GetNumberOfRecognizedNegativeWords() > 0) {
 		
-			HashMap<Integer, String> negativeWordsMap = proteinSent.getNegativeWordsMap();
+			HashMap<Integer, String> negativeWordsMap = proteinSent.getNegativeWordsLoc();
 			
 			Set<Integer> keySet = negativeWordsMap.keySet();
 			List<Integer> keyList = new ArrayList<Integer>(keySet);

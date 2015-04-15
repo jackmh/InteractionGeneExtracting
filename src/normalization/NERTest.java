@@ -1,32 +1,23 @@
 package normalization;
 
-import interaction.geneOfSentence;
-import interaction.getRelationParseTree;
-
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.PrintStream;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
+import normalization.processing.GeneSynonym;
+import normalization.processing.geneToken;
 import config.config;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.process.DocumentPreprocessor;
-import normalization.processing.GeneSynonym;
-import normalization.processing.SimGeneSynonyms;
-import normalization.processing.geneToken;
 import banner.BannerProperties;
 import banner.Sentence;
 import banner.processing.PostProcessor;
@@ -34,86 +25,76 @@ import banner.tagging.CRFTagger;
 import banner.tagging.Mention;
 import banner.tokenization.Tokenizer;
 
-public class geneNM {
+public class NERTest {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) throws IOException {
-		loadGeneAndRelationWordsData();
+
+//		loadGeneAndRelationWordsData();
+		
+		long startTime = (int) System.currentTimeMillis(); 
 		LexicalizedParser lParser = LexicalizedParser
 				.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-
-		List<Sentence> geneTagSentenceList = geneTagger("banner.properties",
-				"/home/jack/Workspaces/tarDIR/model_BC2GM.bin",
-				"/home/jack/Workspaces/expPPI/20MillionPubmedTextData/17342744");
-		// "/home/jack/Workspaces/tarDIR/15208391");
-		String newPubmedText = "", newTextOfRecProtein = "";
-		HashSet<String> interactiveProteinPairSet = new HashSet<String>();
-		for (Sentence sentence : geneTagSentenceList) {
-			/**
-			 * 分析摘要中的每一句，这里已经标识出句子中存在的蛋白质
-			 */
-			// 对识别出来的蛋白质进行标准化转换，转换成官方名称
-			geneOfSentence recGene = new geneOfSentence(sentence);
-			SentenceNM sentNM = geneNormalization(sentence,
-					config.geneSynonym2OfficialDict, recGene);
-			System.out.println("\n--------------------");
-			System.out.println(sentNM.getText());
-			// 若一句话中识别出的蛋白质个数有2个以上, 则才对此句作进一步分析
-			if (sentNM.getMentions().size() >= 1) {
-				System.out.println("----- " + sentNM.getMentions().size() + "(" + printAllGeneMentions(sentNM.getMentions()) + ")");
-				System.out.println(sentNM.getNormSentence());
-			}
-			System.out.println();
-		}
-	}
-
-	/**
-	 * 将识别出的蛋白质实体进行标准化，转换成基因官方名称
-	 */
-	public static SentenceNM geneNormalization(Sentence geneTagSentence,
-			HashMap<String, String> synonymDict, geneOfSentence recGene) {
-		String preText = geneTagSentence.getText();
-		SentenceNM sentence = new SentenceNM(preText);
-		sentence.setMentions(geneTagSentence.getMentions());
-
-		String newText = new String(preText);
-		String substituteSubstr = "";
-		for (Mention mention : geneTagSentence.getMentions()) {
-			substituteSubstr = mention.getText();
-			if (synonymDict.containsKey(mention.getText())) {
-				// 若有多个, 这里暂时只取第一个
-				substituteSubstr = synonymDict.get(mention.getText());
-				String[] substitutestrList = substituteSubstr.split(";");
-				substituteSubstr = substitutestrList[0].trim();
-				recGene.addNewRespStr2GeneMap(mention.getText(),
-						substituteSubstr);
-			} else {
-				/**
-				 * 如果当前识别出来的基因不在建立的字典中(key: 基因别名/基因官方名/基因全称; value: 基因官方名)
-				 * 找出其相似的基因(去特殊字符、符号等)
-				 */
-				SimGeneSynonyms simGene = new SimGeneSynonyms(mention.getText());
-				simGene.geneSynonymsDictHashMap(synonymDict);
-				Map<String, Double> simGeneSynonymsMap = simGene
-						.getSimGeneSynonymsMap();
-				if (!simGeneSynonymsMap.isEmpty()) {
-					substituteSubstr = simGene
-							.getMaxSimilarityGene(synonymDict);
-					// 若此蛋白质别名含有多个官方基因名称
-					String[] simSynonymList = substituteSubstr.split(";");
-					substituteSubstr = simSynonymList[0].trim();
-					recGene.addNewRespStr2GeneMap(mention.getText(),
-							substituteSubstr);
+		
+		List<String> pubmedList = new ArrayList<String>();
+		
+		// Get all file in dir.
+		ArrayList<File> files = getFilesList("/home/jack/Workspaces/expPPI/pubmedtextTestData");
+		System.out.println(files.size());
+		String AllGeneMentions = "";
+		
+		for (File file : files) {
+			List<Sentence> geneTagSentenceList = geneTagger("banner.properties",
+					"/home/jack/Workspaces/tarDIR/model_BC2GM.bin",
+					file.getAbsolutePath());
+			String pubmedMentions = "";
+			String newPubmedText = "";
+			for (Sentence sent : geneTagSentenceList) {
+				newPubmedText += sent.getSGML();
+				for (Mention mention : sent.getMentions()) {
+					pubmedMentions += mention.getText() + ";";
 				}
 			}
-			substituteSubstr = substituteSubstr.trim();
-			newText = newText.replace(mention.getText(), substituteSubstr);
+			String newPubmedTextPath = "/home/jack/Workspaces/expPPI/NERPubmedText" + File.separator + file.getName();
+			writeStringIntoFile(newPubmedTextPath, newPubmedText);
+			AllGeneMentions += file.getName() + "\t" + pubmedMentions + "\n";
 		}
-		sentence.setNormSentence(newText);
-		recGene.setNewSentenceText(newText);
-		return sentence;
+		String newNERFilePath = "/home/jack/Workspaces/expPPI/ProteinNERProtein.result";
+		writeStringIntoFile(newNERFilePath, AllGeneMentions.trim());
+		
+		long endTime=System.currentTimeMillis(); //获取结束时间  毫秒
+		System.out.println("程序运行时间： "+((endTime-startTime)/1000)+"秒"); 
+	}
+	
+	public static ArrayList<File> getFilesList(Object obj) {
+		File Directory = null;
+		if (obj instanceof File) {
+			Directory = (File) obj;
+		}
+		else {
+			Directory = new File(obj.toString());
+		}
+		ArrayList<File> files = new ArrayList<File>();
+		if (Directory.isFile()) {
+			files.add(Directory);
+		}
+		else if (Directory.isDirectory()) {
+			File[] fileArr = Directory.listFiles();
+			for (int i = 0; i < fileArr.length; i ++) {
+				File fileOneFile = fileArr[i];
+				files.addAll(getFilesList(fileOneFile));
+			}
+		}
+		return files;
+	}
+	
+	public static void writeStringIntoFile(String filePath, String fileContent) {
+		try {
+			File file = new File(filePath);
+			PrintStream ps = new PrintStream(new FileOutputStream(file));
+			ps.println(fileContent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -160,9 +141,9 @@ public class geneNM {
 
 	/**
 	 * 输入文件 (/home/jack/Workspaces/HomoSapiens/gene_summary.result)
-	 * config.geneOfficialSet: 人类所有基因官方名称
-	 * config.geneSynProtein2OfficialDict: 字典(key: 基因官方名称; value: 基因完整信息)
-	 * Gene_Synonyms(List<String>), Gene_Type<String>)
+	 * config.geneOfficialSet: 人类所有基因官方名称 config.geneSynProtein2OfficialDict:
+	 * 字典(key: 基因官方名称; value: 基因完整信息) Gene_Synonyms(List<String>),
+	 * Gene_Type<String>)
 	 * 
 	 * config.relationKeySet： 基因相互作用的关系词集合
 	 */
@@ -323,26 +304,4 @@ public class geneNM {
 		return false;
 	}
 
-	/**
-	 * 输出蛋白质相互作用对
-	 */
-	public static String printProteinInteractivePairs(
-			HashSet<String> interactiveProteinPairSet) {
-		String result = "";
-		for (String proteinPairs : interactiveProteinPairSet) {
-			result += proteinPairs + "; ";
-		}
-		return result.trim();
-	}
-
-	/**
-	 * 输出文本中所有识别出的基因
-	 */
-	public static String printAllGeneMentions(List<Mention> geneMentionList) {
-		String resultString = "";
-		for (Mention men : geneMentionList) {
-			resultString += men.getText() + "; ";
-		}
-		return resultString.trim();
-	}
 }

@@ -51,14 +51,15 @@ public class SimGeneSynonyms {
 
 	/**
 	 * 从字典synonymDict(key: 基因别名/基因官方名/基因全称; value: 基因官方名)中找出相似的官方基因
+	 * processingSynonymKeyDict: 
 	 * @param synonymDict
 	 */
-	public void geneSynonymsDictHashMap(HashMap<String, String> synonymDict) {
-		if (synonymDict.size() == 0)
-			throw new IllegalArgumentException("Gene Dict is null.");
+	public void geneSynonymsDictHashMap() {
 		
 		// 字典processingSynonymKeyDict (key:预处理之后的基因别名/全称; value:基因官方名)
 		HashMap<String, String> processingSynonymKeyDict = config.genePostProcessingSynonym2OfficialDict;
+		if (processingSynonymKeyDict.size() == 0)
+			throw new IllegalArgumentException("Gene Dict is null.");
 		
 		// 预处理识别出来的基因, 这里不需要区分特殊字符 /, 则tagGeneSynonym.getPostGeneValueList()仅含一个元素
 		GeneSynonym tagGeneSynonym = new GeneSynonym(geneTag);
@@ -70,11 +71,18 @@ public class SimGeneSynonyms {
 			if (newTag.compareTo("") == 0 || newTag.length() < 2)
 				continue;
 			
+			String keyValue = "";
+			double similarity = 1.0;
 			// 处理完之后的字符串, 当处理完之后的字符串中存在于字典中, 则直接添加
 			if (processingSynonymKeyDict.containsKey(newTag))
 			{
-				String keyValue = processingSynonymKeyDict.get(newTag);
-				simGeneSynonymsMap.put(keyValue, 1.0);
+				keyValue = processingSynonymKeyDict.get(newTag);
+				// 若蛋白质别名与蛋白质对应的官方基因名称为1---N的关系，则需要做如下处理
+				// keyvalue可能为多个官方基因名称的集合
+				String[] keyValueList = keyValue.split(";");
+				for (String key : keyValueList) {
+					simGeneSynonymsMap.put(key, similarity);
+				}
 			}
 			else {
 				// 否则, 遍历字典中所有key, 计算其相似性
@@ -83,10 +91,15 @@ public class SimGeneSynonyms {
 				{
 					String key = iterator.next();
 					// 比较相似性: 若大于阈值则保存起来, 相似度保留2位小数
-					double similarity = similarityOfTwoString(newTag, key);
+					similarity = similarityOfTwoString(newTag, key);
 					if (Double.compare(similarity, Threshold) > 0) {
-						String keyValue = processingSynonymKeyDict.get(key);
-						simGeneSynonymsMap.put(keyValue, similarity);
+						keyValue = processingSynonymKeyDict.get(key);
+						// 若蛋白质别名与蛋白质对应的官方基因名称为1---N的关系，则需要做如下处理
+						// keyvalue可能为多个官方基因名称的集合
+						String[] keyValueList = keyValue.split(";");
+						for (String keytemp : keyValueList) {
+							simGeneSynonymsMap.put(keytemp, similarity);
+						}					
 					}
 				}
 			}
@@ -102,10 +115,13 @@ public class SimGeneSynonyms {
 	 * @param synonymDict
 	 * @return
 	 */
-	public String getMaxSimilarityGene(HashMap<String, String> synonymDict)
+	public String getMaxSimilarityGene()
 	{
-		if (synonymDict == null)
-			throw new IllegalArgumentException("synonymDict cannot be null");
+		if (simGeneSynonymsMap.size() <= 0)
+		{
+			System.out.println("Similarity Gene Synonyms Dictionary is null.");
+			return null;
+		}
 		String text = "";
 		Iterator<String> iterator = simGeneSynonymsMap.keySet().iterator();
 		Double maxSimi = Double.MIN_VALUE;
@@ -113,15 +129,15 @@ public class SimGeneSynonyms {
 		{
 			String key = iterator.next();
 			Double value = simGeneSynonymsMap.get(key);
-			if (maxSimi.compareTo(value) < 0) {
+			if (maxSimi.compareTo(value) <= 0) {
 				maxSimi = value;
 				text = key;
 			}
 		}
 		// 若有多个，选择其中之一
-		String[] simSynonymList = text.split(";");
-		text = simSynonymList[0].trim();
-		return synonymDict.get(text);
+//		String[] simSynonymList = text.split(";");
+//		text = simSynonymList[0].trim();
+		return text;
 	}
 	
 	/** 可以改为余弦相似性
@@ -221,6 +237,10 @@ public class SimGeneSynonyms {
 
 	public void setGeneTag(String geneTag) {
 		this.geneTag = geneTag;
+	}
+	
+	public int getSizeOfGeneSynonyms() {
+		return simGeneSynonymsMap.size();
 	}
 
 	public Map<String, Double> getSimGeneSynonymsMap() {
