@@ -17,7 +17,6 @@ import normalization.processing.GeneSynonym;
 import normalization.processing.geneToken;
 import config.config;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import banner.BannerProperties;
 import banner.Sentence;
 import banner.processing.PostProcessor;
@@ -31,11 +30,7 @@ public class NERTest {
 
 //		loadGeneAndRelationWordsData();
 		
-		long startTime = (int) System.currentTimeMillis(); 
-		LexicalizedParser lParser = LexicalizedParser
-				.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-		
-		List<String> pubmedList = new ArrayList<String>();
+		long startTime = (int) System.currentTimeMillis();		
 		
 		// Get all file in dir.
 		ArrayList<File> files = getFilesList("/home/jack/Workspaces/expPPI/pubmedtextTestData");

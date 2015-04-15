@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import config.config;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import banner.BannerProperties;
 import banner.Sentence;
 import banner.processing.PostProcessor;
@@ -21,11 +20,8 @@ public class NormTest {
 	public static void main(String[] args) throws IOException {
 
 		config.loadGeneAndRelationWordsData();
-		LexicalizedParser lParser = LexicalizedParser
-				.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
 
-		List<Sentence> geneTagSentenceList = geneTagger("banner.properties",
-				"/home/jack/Workspaces/tarDIR/model_BC2GM.bin",
+		List<Sentence> geneTagSentenceList = geneTagger("banner.properties", "model_BC2GM.bin",
 //				"/home/jack/Workspaces/expPPI/20MillionPubmedTextData/17342744");
 		 "/home/jack/Workspaces/tarDIR/test.1734274444");
 		String newPubmedText = "";

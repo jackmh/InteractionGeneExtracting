@@ -11,7 +11,6 @@ import java.util.Set;
 import config.config;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.PTBTokenizer;
 
 public class ElemOfSentence {
 		
