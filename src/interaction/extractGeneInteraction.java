@@ -19,7 +19,6 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import config.config;
-import normalization.ElemOfSentence;
 import normalization.NormSentence;
 import banner.BannerProperties;
 import banner.Sentence;

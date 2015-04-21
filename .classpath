@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="libs"/>
-	<classpathentry kind="lib" path="libs/dragontool.jar"/>
-	<classpathentry kind="lib" path="libs/mallet.jar" sourcepath="C:/workspace_school/BANNER/libs/mallett_src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/home/jack/keTiInHIT_FROM2014_08/tools/stanford-parser-full-2014-06-16/stanford-parser.jar"/>
 	<classpathentry kind="lib" path="/home/jack/keTiInHIT_FROM2014_08/tools/stanford-parser-full-2014-06-16/stanford-parser-3.4-models.jar"/>
 	<classpathentry kind="lib" path="/home/jack/keTiInHIT_FROM2014_08/tools/stanford-tregex-2014-06-16/stanford-tregex.jar"/>
-	<classpathentry kind="lib" path="/home/jack/workspace/InteractionGeneExtracting/libs/heptag.jar"/>
+	<classpathentry kind="lib" path="/home/jack/workspace/packages/heptag.jar"/>
+	<classpathentry kind="lib" path="/home/jack/workspace/packages/dragontool.jar"/>
+	<classpathentry kind="lib" path="/home/jack/Workspaces/InteractionGeneExtracting/libs/mallet.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

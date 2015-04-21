@@ -1,5 +1,7 @@
 package normalization;
 
+import interaction.ElemOfSentence;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -14,7 +14,7 @@ import normalization.processing.geneToken;
 
 public class config {
 	
-	public static boolean __DEBUG__ = true;
+	public static boolean __DEBUG__ = false;
 	public static boolean __WriteIntoFileFlag__ = true;
 	public static boolean __ANALYSISFLAG__ = true;
 	public static boolean __PUBMEDIDLISTFROMFNAME__ = true;

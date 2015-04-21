@@ -1,4 +1,4 @@
-package normalization;
+package interaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,37 +28,47 @@ import banner.tokenization.Tokenizer;
 public class NERTest {
 
 	public static void main(String[] args) throws IOException {
-
 //		loadGeneAndRelationWordsData();
-		
 		long startTime = (int) System.currentTimeMillis();		
 		
-		// Get all file in dir.
-		ArrayList<File> files = getFilesList("/home/jack/Workspaces/expPPI/pubmedtextTestData");
-		System.out.println(files.size());
-		String AllGeneMentions = "";
-		
+		// "/home/jack/Workspaces/expPPI/pubmedtextTestData"
+		String filePathString = args[0];
+		// Get all file in dir. "/home/jack/Workspaces/expPPI/pubmedtextTestData"
+		ArrayList<File> files = getFilesList(filePathString);
+		HashSet<String> NERGeneMentionsHashSet = new HashSet<String>();
+		//"banner.properties", "model_BC2GM.bin",
+		//
+		File propertiesFile = new File("banner.properties");
+		File model_BC2GM = new File("model_BC2GM.bin");
 		for (File file : files) {
-			List<Sentence> geneTagSentenceList = geneTagger("banner.properties",
-					"/home/jack/Workspaces/tarDIR/model_BC2GM.bin",
+			List<Sentence> geneTagSentenceList = geneTagger(propertiesFile.getAbsolutePath(), model_BC2GM.getAbsolutePath(),
 					file.getAbsolutePath());
-			String pubmedMentions = "";
-			String newPubmedText = "";
 			for (Sentence sent : geneTagSentenceList) {
-				newPubmedText += sent.getSGML();
 				for (Mention mention : sent.getMentions()) {
-					pubmedMentions += mention.getText() + ";";
+					if (NERGeneMentionsHashSet.contains(mention.getText())) {
+						continue;
+					}
+					NERGeneMentionsHashSet.add(mention.getText());
 				}
 			}
-			String newPubmedTextPath = "/home/jack/Workspaces/expPPI/NERPubmedText" + File.separator + file.getName();
-			writeStringIntoFile(newPubmedTextPath, newPubmedText);
-			AllGeneMentions += file.getName() + "\t" + pubmedMentions + "\n";
 		}
-		String newNERFilePath = "/home/jack/Workspaces/expPPI/ProteinNERProtein.result";
-		writeStringIntoFile(newNERFilePath, AllGeneMentions.trim());
+		// "/home/jack/test/ProteinNERProtein.result"
+		String newNERFilePath = args[1];
+		writeHashMapIntoFile(NERGeneMentionsHashSet, newNERFilePath);
 		
 		long endTime=System.currentTimeMillis(); //获取结束时间  毫秒
-		System.out.println("程序运行时间： "+((endTime-startTime)/1000)+"秒"); 
+		System.out.println("程序运行时间： "+((endTime-startTime))+"毫秒"); 
+	}
+	
+	public static void writeHashMapIntoFile(HashSet<String> geneMentionsSet, String filePath)
+	{
+		Iterator<String> iter = geneMentionsSet.iterator();
+		String allGeneMentions = "";
+		while (iter.hasNext()) {
+			String geneMentions = iter.next();
+			allGeneMentions += geneMentions + "\n";			
+		}
+		writeStringIntoFile(filePath, allGeneMentions.trim());
 	}
 	
 	public static ArrayList<File> getFilesList(Object obj) {
